@@ -102,15 +102,17 @@ public class AdminController {
 
 //    Update Employee Salary
     @PutMapping("/employee/salaryUpdate/{id}")
-    public ResponseEntity<Void> EmployeeSalaryUpdate(@RequestBody double salary,@PathVariable Long id) {
+    public ResponseEntity<Void> EmployeeSalaryUpdate(@RequestBody EmployeeEntity employeeEntity,@PathVariable Long id) {
 
+        System.out.println(employeeEntity.getSalary());
         EmployeeEntity empData = employeeRepository.findById(id).get();
 
         if(empData.getName().isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        empData.setSalary(salary);
+        empData.setSalary(employeeEntity.getSalary());
+        empData.setPaid(true);
         employeeRepository.save(empData);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

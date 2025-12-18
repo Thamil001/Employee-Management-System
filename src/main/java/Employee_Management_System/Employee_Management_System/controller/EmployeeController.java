@@ -36,9 +36,11 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        EmployeeEntity checkExitsName = checkExitsEmployee.get();
+        EmployeeEntity checkExits = checkExitsEmployee.get();
 
-        if(!checkExitsName.getName().equals(employeeEntity.getName())) {
+        if(!checkExits.getName().equals(employeeEntity.getName())
+         || !checkExits.getContact().equals(employeeEntity.getContact())) {
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
