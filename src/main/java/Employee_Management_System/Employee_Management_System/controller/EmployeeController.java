@@ -16,7 +16,7 @@ public class EmployeeController {
     EmployeeRepository employeeRepository;
 
 //    Employee Registration
-    @PostMapping("/employeeRegistration")
+    @PostMapping("/registration")
     public ResponseEntity<Void> employeeRegistration(@RequestBody EmployeeEntity employeeEntity) {
 
         if(employeeEntity.getName().trim().isEmpty()) {
@@ -27,7 +27,7 @@ public class EmployeeController {
     }
 
 //    Employee Login
-    @PostMapping("/employeeLogin/{id}")
+    @PostMapping("/login/{id}")
     public ResponseEntity<Void> employeeLogin(@RequestBody EmployeeEntity employeeEntity, @PathVariable Long id) {
 
         Optional<EmployeeEntity> checkExitsEmployee = employeeRepository.findById(id);
@@ -42,14 +42,25 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 //    Employee Get Data by id
-    @GetMapping("/employeeData/{id}")
+    @GetMapping("/data/{id}")
     public ResponseEntity<EmployeeEntity> employeeData(@PathVariable Long id) {
 
-        return ResponseEntity.ok().body(employeeRepository.findById(id).get());
+        Optional<EmployeeEntity> checkExitsEmployee = employeeRepository.findById(id);
+
+        if(checkExitsEmployee.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        EmployeeEntity empData = employeeRepository.findById(id).get();
+
+        if (empData.getName().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok().body(empData);
     }
 
 }
