@@ -15,17 +15,6 @@ public class EmployeeController {
     @Autowired
     EmployeeRepository employeeRepository;
 
-//    Employee Registration
-    @PostMapping("/registration")
-    public ResponseEntity<Void> employeeRegistration(@RequestBody EmployeeEntity employeeEntity) {
-
-        if(employeeEntity.getName().trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        employeeRepository.save(employeeEntity);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
 //    Employee Login
     @PostMapping("/login/{id}")
     public ResponseEntity<Void> employeeLogin(@RequestBody EmployeeEntity employeeEntity, @PathVariable Long id) {
@@ -63,6 +52,25 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok().body(empData);
+    }
+
+//    Getting Employee Own id
+    @PostMapping("/getId")
+    public ResponseEntity<Long> getId(@RequestBody EmployeeEntity employeeEntity) {
+
+        Optional<EmployeeEntity> checkExitsEmployee = employeeRepository.findByName(employeeEntity.getName());
+
+        if(checkExitsEmployee.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        EmployeeEntity checkExitsContact = checkExitsEmployee.get();
+
+        if(!checkExitsContact.getContact().equals(employeeEntity.getContact())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok().body(checkExitsContact.getId());
     }
 
 }
