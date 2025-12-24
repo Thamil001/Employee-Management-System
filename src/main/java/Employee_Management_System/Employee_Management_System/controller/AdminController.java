@@ -10,8 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
@@ -22,12 +24,16 @@ public class AdminController {
     @Autowired
     EmployeeRepository employeeRepository;
 
-    @PostMapping("/password/{password}")
-    public ResponseEntity<Void> checkSuperAdmin(@PathVariable Long password) {
-        if(password!=2004) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    @PostMapping("/auth")
+    public ResponseEntity<Void> adminAuthentication(@RequestBody int password) {
+
+//        System.out.println(password);
+        if(password == 2004) {
+            return  ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+
     }
 
     //    Admin Registration
@@ -43,11 +49,13 @@ public class AdminController {
     }
 
 
-    //    Admin Login
-    @PostMapping("/login/{id}")
-    public ResponseEntity<Void> adminLogin(@RequestBody AdminEntity adminEntity, @PathVariable Long id) {
 
-        Optional<AdminEntity> checkIdExits = adminRepository.findById(id);
+    //    Admin Login
+    @PostMapping("/login")
+    public ResponseEntity<Void> adminLogin(@RequestBody AdminEntity adminEntity) {
+
+        Optional<AdminEntity> checkIdExits = adminRepository.findById(adminEntity.getId()
+        );
 
         if (checkIdExits.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -71,6 +79,7 @@ public class AdminController {
         if (!adminRepository.existsById(adminEntity.getId())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         return ResponseEntity.ok().body(employeeRepository.findAll());
     }
 
@@ -83,10 +92,6 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         EmployeeEntity empData = employeeRepository.findById(id).get();
-
-        if (empData.getName().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
 
         return ResponseEntity.ok().body(empData);
 
@@ -129,9 +134,6 @@ public class AdminController {
         System.out.println(employeeEntity.getSalary());
         EmployeeEntity empData = employeeRepository.findById(employeeEntity.getId()).get();
 
-        if (empData.getName().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         empData.setSalary(employeeEntity.getSalary());
         empData.setPaid(true);
@@ -153,11 +155,22 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+
         EmployeeEntity checkExitEmployee = checkExitsId.get();
-        checkExitEmployee.setName(employeeEntity.getName());
-        checkExitEmployee.setContact(employeeEntity.getContact());
-        checkExitEmployee.setDepartment(employeeEntity.getDepartment());
-        checkExitEmployee.setRole(employeeEntity.getRole());
+        if(!employeeEntity.getName().trim().isEmpty()) {
+
+            checkExitEmployee.setName(employeeEntity.getName());
+        }
+        if(!employeeEntity.getContact().trim().isEmpty()) {
+            checkExitEmployee.setContact(employeeEntity.getContact());
+        }
+        if(!employeeEntity.getDepartment().trim().isEmpty()) {
+             checkExitEmployee.setDepartment(employeeEntity.getDepartment());
+        }
+        if (!employeeEntity.getRole().trim().isEmpty()) {
+            
+            checkExitEmployee.setRole(employeeEntity.getRole());
+        }
         employeeRepository.save(checkExitEmployee);
         return ResponseEntity.status(HttpStatus.OK).build();
 
@@ -176,6 +189,7 @@ public class AdminController {
         if (employeeEntity.getName().trim().isEmpty() || checkExitsContact.isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+
         employeeRepository.save(employeeEntity);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

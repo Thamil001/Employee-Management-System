@@ -7,8 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
@@ -16,10 +18,10 @@ public class EmployeeController {
     EmployeeRepository employeeRepository;
 
 //    Employee Login
-    @PostMapping("/login/{id}")
-    public ResponseEntity<Void> employeeLogin(@RequestBody EmployeeEntity employeeEntity, @PathVariable Long id) {
+    @PostMapping("/login")
+    public ResponseEntity<Void> employeeLogin(@RequestBody EmployeeEntity employeeEntity) {
 
-        Optional<EmployeeEntity> checkExitsEmployee = employeeRepository.findById(id);
+        Optional<EmployeeEntity> checkExitsEmployee = employeeRepository.findById(employeeEntity.getId());
 
         if(checkExitsEmployee.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -27,9 +29,8 @@ public class EmployeeController {
 
         EmployeeEntity checkExits = checkExitsEmployee.get();
 
-        if(!checkExits.getName().equals(employeeEntity.getName())
-         || !checkExits.getContact().equals(employeeEntity.getContact())) {
-
+        if(!checkExits.getName().equals(employeeEntity.getName())) {
+            System.out.println("Error"+checkExits.getName());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -37,40 +38,24 @@ public class EmployeeController {
     }
 
 //    Employee Get Data by id
-    @GetMapping("/data/{id}")
-    public ResponseEntity<EmployeeEntity> employeeData(@PathVariable Long id) {
+    @PostMapping("/data")
+    public ResponseEntity<List<EmployeeEntity>> employeeData(@RequestBody EmployeeEntity employeeEntity) {
 
-        Optional<EmployeeEntity> checkExitsEmployee = employeeRepository.findById(id);
+        Optional<EmployeeEntity> checkExitsEmployee = employeeRepository.findById(employeeEntity.getId());
 
         if(checkExitsEmployee.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        EmployeeEntity empData = employeeRepository.findById(id).get();
+        EmployeeEntity empData = employeeRepository.findById(employeeEntity.getId()).get();
 
         if (empData.getName().isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok().body(empData);
+        return ResponseEntity.ok(
+                List.of(employeeRepository.findById(employeeEntity.getId()).get())
+        );
     }
 
-//    Getting Employee Own id
-    @PostMapping("/getId")
-    public ResponseEntity<Long> getId(@RequestBody EmployeeEntity employeeEntity) {
-
-        Optional<EmployeeEntity> checkExitsEmployee = employeeRepository.findByName(employeeEntity.getName());
-
-        if(checkExitsEmployee.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        EmployeeEntity checkExitsContact = checkExitsEmployee.get();
-
-        if(!checkExitsContact.getContact().equals(employeeEntity.getContact())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        return ResponseEntity.ok().body(checkExitsContact.getId());
-    }
 
 }
