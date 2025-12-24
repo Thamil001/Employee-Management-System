@@ -72,7 +72,6 @@ export const Cart = () => {
         }
     };
 
-
     return (
         <>
             <Container sx={{ display: "flex", minHeight: '60vh', alignItems: "center", justifyContent: "center" }}>
